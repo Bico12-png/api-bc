@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Discord - Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c2f33;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #36393f;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #7289da;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            background-color: #40444b;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-value {
+            font-weight: bold;
+            color: #43b581;
+        }
+        .loading {
+            color: #faa61a;
+        }
+        .error {
+            color: #f04747;
+        }
+        .refresh-btn {
+            background-color: #7289da;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        .refresh-btn:hover {
+            background-color: #5b6eae;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #99aab5;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 API Discord - Status</h1>
+        <div id="status-container">
+            <div class="status-item">
+                <span>Status da API:</span>
+                <span class="status-value loading" id="api-status">Carregando...</span>
+            </div>
+            <div class="status-item">
+                <span>Total de Usuários:</span>
+                <span class="status-value" id="total-users">-</span>
+            </div>
+            <div class="status-item">
+                <span>Usuários Ativos:</span>
+                <span class="status-value" id="active-users">-</span>
+            </div>
+            <div class="status-item">
+                <span>Usuários Logados:</span>
+                <span class="status-value" id="logged-users">-</span>
+            </div>
+            <div class="status-item">
+                <span>Usuários Expirados:</span>
+                <span class="status-value" id="expired-users">-</span>
+            </div>
+            <div class="status-item">
+                <span>Administradores:</span>
+                <span class="status-value" id="admin-users">-</span>
+            </div>
+        </div>
+        <button class="refresh-btn" onclick="loadStatus()">🔄 Atualizar Status</button>
+        <div class="timestamp" id="last-update">Última atualização: -</div>
+    </div>
+
+    <script>
+        async function loadStatus() {
+            try {
+                document.getElementById('api-status').textContent = 'Carregando...';
+                document.getElementById('api-status').className = 'status-value loading';
+                
+                const response = await fetch('/api/status');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('api-status').textContent = '🟢 Online';
+                    document.getElementById('api-status').className = 'status-value';
+                    document.getElementById('total-users').textContent = data.total_users;
+                    document.getElementById('active-users').textContent = data.active_users;
+                    document.getElementById('logged-users').textContent = data.logged_users;
+                    document.getElementById('expired-users').textContent = data.expired_users;
+                    document.getElementById('admin-users').textContent = data.admin_users;
+                    
+                    const timestamp = new Date(data.timestamp).toLocaleString('pt-BR');
+                    document.getElementById('last-update').textContent = `Última atualização: ${timestamp}`;
+                } else {
+                    throw new Error('Erro na resposta da API');
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = '🔴 Offline';
+                document.getElementById('api-status').className = 'status-value error';
+                console.error('Erro ao carregar status:', error);
+            }
+        }
+
+        // Carregar status ao inicializar a página
+        loadStatus();
+
+        // Atualizar status automaticamente a cada 30 segundos
+        setInterval(loadStatus, 30000);
+    </script>
+</body>
+</html>
